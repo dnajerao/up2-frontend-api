@@ -7,20 +7,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.up2promisedland.api.entities.Examen;
-import com.up2promisedland.api.services.ExamenService;
+import com.up2promisedland.api.beans.LoginBean;
+import com.up2promisedland.api.services.AuthService;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-@RequestMapping("/examen")
-public class ExamenController {
-
+@RequestMapping("/auth")
+public class AuthController {
+	
 	@Autowired
-	private ExamenService examenService;
+	private AuthService authService;
 
-	@PostMapping
-	public Examen addExamen(@RequestBody Examen examen) {
-		return examenService.addExamen(examen);
+	
+	@PostMapping("/login")
+	public Integer addUsuario(@RequestBody LoginBean loginBean) {
+		return authService.login(loginBean);
 	}
 
 }

@@ -7,30 +7,33 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Entity
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Examen {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	
+
 	private String nombre;
-	
+
 	private String apellido_paterno;
-	
+
 	private String apellido_materno;
-	
+
 	private String correo_electronico;
-	
+
 	private String telefono;
-	
+
 	private double correctas;
-	
+
+	private String codigo_regalo;
+
 	@CreationTimestamp
 	@Column(insertable = false, updatable = false)
 	private Date fecha_creacion;
@@ -39,16 +42,16 @@ public class Examen {
 		super();
 	}
 
-	public Examen(Integer id, String nombre, String apellido_paterno, String apellido_materno,
-			String correo_electronico, String telefono, double correctas, Date fecha_creacion) {
+	public Examen(String nombre, String apellido_paterno, String apellido_materno, String correo_electronico,
+			String telefono, double correctas, String codigo_regalo, Date fecha_creacion) {
 		super();
-		this.id = id;
 		this.nombre = nombre;
 		this.apellido_paterno = apellido_paterno;
 		this.apellido_materno = apellido_materno;
 		this.correo_electronico = correo_electronico;
 		this.telefono = telefono;
 		this.correctas = correctas;
+		this.codigo_regalo = codigo_regalo;
 		this.fecha_creacion = fecha_creacion;
 	}
 
@@ -104,8 +107,16 @@ public class Examen {
 		return correctas;
 	}
 
-	public void setComentario(double correctas) {
+	public void setCorrectas(double correctas) {
 		this.correctas = correctas;
+	}
+
+	public String getCodigo_regalo() {
+		return codigo_regalo;
+	}
+
+	public void setCodigo_regalo(String codigo_regalo) {
+		this.codigo_regalo = codigo_regalo;
 	}
 
 	public Date getFecha_creacion() {
@@ -143,9 +154,10 @@ public class Examen {
 
 	@Override
 	public String toString() {
-		return "Contacto [id=" + id + ", nombre=" + nombre + ", apellido_paterno=" + apellido_paterno
+		return "Examen [id=" + id + ", nombre=" + nombre + ", apellido_paterno=" + apellido_paterno
 				+ ", apellido_materno=" + apellido_materno + ", correo_electronico=" + correo_electronico
-				+ ", telefono=" + telefono + ", correctas=" + correctas + "]";
+				+ ", telefono=" + telefono + ", correctas=" + correctas + ", codigo_regalo=" + codigo_regalo
+				+ ", fecha_creacion=" + fecha_creacion + "]";
 	}
 
 }

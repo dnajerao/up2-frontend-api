@@ -35,6 +35,7 @@ public class ExamenBusinessImpl implements ExamenBusiness {
 		details.add(new EmailContentDetail("phone", examen.getTelefono()));
 		details.add(new EmailContentDetail("level", calculateLevel(examen.getCorrectas())));
 		details.add(new EmailContentDetail("corrects", String.valueOf(examen.getCorrectas())));
+		details.add(new EmailContentDetail("giftCode", String.valueOf(examen.getCodigo_regalo())));
 
 		EmailContent emailContent = new EmailContent(examen.getCorreo_electronico(),
 				"Te tenemos noticias! Aquí estan tus resultados!", details);
