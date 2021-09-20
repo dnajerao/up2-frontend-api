@@ -10,6 +10,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,21 +25,30 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 @Entity
-public class UsuariosGrupo {
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+public class Producto {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "grupo", nullable = false)
-	private Grupo grupo;
+	private String tipo;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "alumno", nullable = false)
-	private Usuario alumno;
+	@JoinColumn(name = "nivel", nullable = true)
+	private Nivel nivel;
 
-	private String estatus;
+	private String producto;
+
+	private String descripcion;
+
+	private Double precio;
+
+	private Integer msi;
+
+	private Double precioMsi;
+
+	private String foto;
 
 	@Column(insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Date fechaRegistro;
@@ -44,16 +56,13 @@ public class UsuariosGrupo {
 	@Column(insertable = false, updatable = true, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Date fechaActualizacion;
 
-	public UsuariosGrupo(Integer id) {
+	public Producto(Integer id) {
 		super();
 		this.id = id;
 	}
 
-	public UsuariosGrupo(Grupo grupo, Usuario alumno, String estatus) {
-		super();
-		this.grupo = grupo;
-		this.alumno = alumno;
-		this.estatus = estatus;
+	public String toMailString() {
+		return String.format("%s %s - Nivel %s", this.getProducto(), this.getDescripcion(), this.getNivel().getClave());
 	}
 
 }

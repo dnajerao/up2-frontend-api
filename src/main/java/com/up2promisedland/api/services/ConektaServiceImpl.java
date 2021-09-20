@@ -1,24 +1,29 @@
 package com.up2promisedland.api.services;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.up2promisedland.api.conekta.ConektaCustomer;
-import com.up2promisedland.api.entities.Usuario;
-import com.up2promisedland.api.repositories.UsuarioRepository;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.up2promisedland.api.conekta.ChargeElement;
+import com.up2promisedland.api.conekta.ConektaCharge;
+import com.up2promisedland.api.conekta.CustomerInfo;
+import com.up2promisedland.api.conekta.LineItem;
+import com.up2promisedland.api.conekta.PaymentMethod;
+import com.up2promisedland.api.entities.CarritoProductos;
+import com.up2promisedland.api.entities.OrdenPago;
 
+import io.conekta.Charge;
 import io.conekta.Conekta;
-import io.conekta.ConektaList;
-import io.conekta.Customer;
 import io.conekta.Error;
 import io.conekta.ErrorList;
 import io.conekta.Order;
@@ -28,66 +33,67 @@ public class ConektaServiceImpl implements ConektaService {
 
 	Logger log = LoggerFactory.getLogger(ConektaServiceImpl.class);
 
-	@Autowired
-	private UsuarioRepository usuarioRepository;
-
 	@Value("${conekta.api.secret}")
 	private String conektaApiSecret;
 
-	@Override
-	public Usuario createCustomer(Usuario usuario) {
+	Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+	@Override
+	public Charge createCardPayment(OrdenPago orden, String token, Boolean msi) {
 		Conekta.setApiKey(conektaApiSecret);
 
 		try {
 
-			ConektaCustomer conektaCustomer = new ConektaCustomer(
-					usuario.getNombre() + " " + usuario.getApellidoPaterno() + " " + usuario.getApellidoMaterno(),
-					usuario.getCorreoElectronico(), usuario.getTelefono());
+			Order completeOrder = Order.create(new JSONObject(gson.toJson(parseCharge(orden, msi, token))));
+			log.info("Conekta Response {}", completeOrder);
 
-			JSONObject obj = new JSONObject(conektaCustomer);
-			
-			Customer customer = Customer.create(obj);
-
-			usuario.setIdConekta(customer.getId());
-			usuario.setFechaActualizacion(new Date());
-
-			return usuarioRepository.save(usuario);
+			return (Charge) completeOrder.charges.get(0);
 
 		} catch (JSONException e) {
 			log.error(e.getStackTrace().toString());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error al generar comunicación con Conekta");
 		} catch (Error e) {
 			log.error(e.getStackTrace().toString());
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Error desconocido");
 		} catch (ErrorList e) {
 			log.error("Conekta", e.details.get(0));
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.details.get(0).message_to_purchaser);
 		}
-
-		return null;
 	}
 
 	@Override
-	public ConektaList createCardPayment() {
-		try {
-			Conekta.setApiKey(conektaApiSecret);
-			JSONObject completeOrderJSON = new JSONObject("{" + "'currency': 'mxn'," + "'metadata': {"
-					+ "    'test': true" + "}," + "'line_items': [{" + "    'name': 'Box of Cohiba S1s',"
-					+ "    'description': 'Imported From Mex.'," + "    'unit_price': 35000," + "    'quantity': 1,"
-					+ "    'tags': ['food', 'mexican food']," + "    'type': 'physical'" + "}]," + "'customer_info': { "
-					+ "    'name': 'John Constantine'," + "    'phone': '+5213353319758',"
-					+ "    'email': 'dnajera0806@gmail.com'" + "}," + "'charges': [{" + "    'payment_method': {"
-					+ "        'type': 'card'," + "        'token_id': 'tok_test_visa_4242'" + "    }, "
-					+ "    'amount': 35000" + "}]" + "}");
+	public ConektaCharge parseCharge(OrdenPago payment, Boolean msi, String token) {
 
-			Order completeOrder = Order.create(completeOrderJSON);
+		CustomerInfo customerInfo = new CustomerInfo(
+				String.format("%s %s %s", payment.getUsuario().getNombre(), payment.getUsuario().getApellidoPaterno(),
+						payment.getUsuario().getApellidoMaterno()),
+				payment.getUsuario().getTelefono(), payment.getUsuario().getCorreoElectronico());
 
-			return completeOrder.charges;
-		} catch (Error e) {
-			e.printStackTrace();
-		} catch (ErrorList e) {
-			log.error(e.getMessage());
+		long amount = 0;
+		List<LineItem> lineItems = new ArrayList<LineItem>();
+		for (CarritoProductos item : payment.getCarrito()) {
+
+			Double price;
+			if (msi)
+				price = item.getProducto().getPrecioMsi();
+			else
+				price = item.getProducto().getPrecio();
+
+			lineItems.add(new LineItem(item.getProducto().getProducto(), item.getProducto().getDescripcion(),
+					(long) (price * 100), item.getCantidad()));
+
+			amount += price * item.getCantidad();
 		}
-		return null;
+
+		List<ChargeElement> charges = new ArrayList<ChargeElement>();
+		ChargeElement element = new ChargeElement(new PaymentMethod("card", token), (amount * 100));
+
+		if (msi)
+			element.getPayment_method().setMonthly_installments(3);
+
+		charges.add(element);
+
+		return new ConektaCharge("mxn", lineItems, customerInfo, charges);
 	}
 
 }

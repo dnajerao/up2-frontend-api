@@ -23,7 +23,7 @@ public class EmailBusinessImpl implements EmailBusiness {
 
 	@Value("${spring.mail.username}")
 	private String senderMail;
-	
+
 	@Autowired
 	private EmailTemplateRepository emailTemplateRepository;
 
@@ -31,31 +31,35 @@ public class EmailBusinessImpl implements EmailBusiness {
 	private JavaMailSender emailSender;
 
 	@Override
-	public boolean sendMail(String template, EmailContent content) throws MessagingException {
+	public boolean sendMail(String template, EmailContent content) {
+		try {
+			Optional<EmailTemplate> emailTemplate = emailTemplateRepository.findByCodigoTemplate(template);
 
-		Optional<EmailTemplate> emailTemplate = emailTemplateRepository.findByCodigoTemplate(template);
+			if (!emailTemplate.isPresent())
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND, "template not exists");
 
-		if (!emailTemplate.isPresent())
-			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "template not exists");
+			String body = emailTemplate.get().getHtml();
 
-		String body = emailTemplate.get().getHtml();
+			for (EmailContentDetail detail : content.getDetails()) {
+				String token = "[" + detail.getKey() + "]";
+				body = body.replace(token, detail.getValue());
+			}
 
-		for (EmailContentDetail detail : content.getDetails()) {
-			String token = "[" + detail.getKey() + "]";
-			body = body.replace(token, detail.getValue());
+			MimeMessage message = emailSender.createMimeMessage();
+			MimeMessageHelper helper = new MimeMessageHelper(message);
+			helper.setFrom(senderMail);
+			helper.setTo(content.getTo());
+			helper.setCc(senderMail);
+			helper.setSubject(content.getSubject());
+
+			helper.setText(body, true);
+
+			emailSender.send(message);
+			return true;
+
+		} catch (MessagingException e) {
+			throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
 		}
-		
-		MimeMessage message = emailSender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(message);
-		helper.setFrom(senderMail);
-		helper.setTo(content.getTo());
-		helper.setCc(senderMail);
-		helper.setSubject(content.getSubject());
-		helper.setText(body, true);
-		
-		emailSender.send(message);
-		
-		return true;
 	}
 
 }

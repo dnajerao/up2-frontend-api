@@ -3,12 +3,8 @@ package com.up2promisedland.api.services;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.mail.MessagingException;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.up2promisedland.api.business.EmailBusiness;
 import com.up2promisedland.api.entities.Contacto;
@@ -38,11 +34,7 @@ public class ContactoServiceImpl implements ContactoService {
 		EmailContent emailContent = new EmailContent(contacto.getCorreo_electronico(),
 				"Gracias por contactarnos desde Up2PromisedLand.com!", details);
 
-		try {
-			emailBusiness.sendMail("CONTACTO", emailContent);
-		} catch (MessagingException e) {
-			throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Mail service unavailable");
-		}
+		emailBusiness.sendMail("CONTACTO", emailContent);
 
 		return contactoRepository.save(contacto);
 	}

@@ -3,12 +3,8 @@ package com.up2promisedland.api.business;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.mail.MessagingException;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.up2promisedland.api.entities.Examen;
 import com.up2promisedland.api.repositories.ExamenRepository;
@@ -40,38 +36,34 @@ public class ExamenBusinessImpl implements ExamenBusiness {
 		EmailContent emailContent = new EmailContent(examen.getCorreo_electronico(),
 				"Te tenemos noticias! Aquí estan tus resultados!", details);
 
-		try {
-			emailBusiness.sendMail("EXAMEN", emailContent);
-		} catch (MessagingException e) {
-			throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Mail service unavailable");
-		}
+		emailBusiness.sendMail("EXAMEN", emailContent);
 
 		return examenRepository.save(examen);
 	}
 
 	@Override
 	public String calculateLevel(double corrects) {
-		
-		if(corrects > 80) {
+
+		if (corrects > 80) {
 			return "Advanced";
 		}
-		
-		if(corrects > 60) {
+
+		if (corrects > 60) {
 			return "Upper Intermediate";
 		}
-		
-		if(corrects > 50) {
+
+		if (corrects > 50) {
 			return "Intermediate";
 		}
-		
-		if(corrects > 20) {
+
+		if (corrects > 20) {
 			return "Lower Intermediate";
 		}
-		
-		if(corrects >= 0) {
+
+		if (corrects >= 0) {
 			return "Elementary";
 		}
-		
+
 		return "";
 	}
 

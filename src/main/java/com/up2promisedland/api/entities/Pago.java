@@ -2,6 +2,7 @@ package com.up2promisedland.api.entities;
 
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -10,6 +11,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,19 +26,24 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 @Entity
-public class UsuariosGrupo {
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+public class Pago {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "grupo", nullable = false)
-	private Grupo grupo;
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn(name = "ordenPago")
+	private OrdenPago ordenPago;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "alumno", nullable = false)
-	private Usuario alumno;
+	private String conektaOrderId;
+
+	private String conektaCargoId;
+
+	private String razonSocial;
+
+	private String rfc;
 
 	private String estatus;
 
@@ -44,15 +53,23 @@ public class UsuariosGrupo {
 	@Column(insertable = false, updatable = true, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Date fechaActualizacion;
 
-	public UsuariosGrupo(Integer id) {
+	public Pago(Integer id) {
 		super();
 		this.id = id;
 	}
 
-	public UsuariosGrupo(Grupo grupo, Usuario alumno, String estatus) {
+	public Pago(OrdenPago ordenPago, String conektaOrderId, String conektaCargoId) {
 		super();
-		this.grupo = grupo;
-		this.alumno = alumno;
+		this.ordenPago = ordenPago;
+		this.conektaOrderId = conektaOrderId;
+		this.conektaCargoId = conektaCargoId;
+	}
+
+	public Pago(OrdenPago ordenPago, String conektaOrderId, String conektaCargoId, String estatus) {
+		super();
+		this.ordenPago = ordenPago;
+		this.conektaOrderId = conektaOrderId;
+		this.conektaCargoId = conektaCargoId;
 		this.estatus = estatus;
 	}
 

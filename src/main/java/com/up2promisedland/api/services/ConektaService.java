@@ -1,17 +1,14 @@
 package com.up2promisedland.api.services;
 
-import com.up2promisedland.api.entities.Usuario;
+import com.up2promisedland.api.conekta.ConektaCharge;
+import com.up2promisedland.api.entities.OrdenPago;
 
-import io.conekta.ConektaList;
-import io.conekta.Customer;
-import io.conekta.Error;
-import io.conekta.ErrorList;
-import io.conekta.Order;
+import io.conekta.Charge;
 
 public interface ConektaService {
-	
-	public Usuario createCustomer(Usuario usuario);
-	
-	public ConektaList createCardPayment();
+
+	public Charge createCardPayment(OrdenPago paymentOrder, String token, Boolean msi);
+
+	public ConektaCharge parseCharge(OrdenPago payment, Boolean msi, String token);
 
 }

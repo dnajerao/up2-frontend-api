@@ -10,6 +10,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,21 +26,23 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 @Entity
-public class UsuariosGrupo {
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+public class CarritoProductos {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "grupo", nullable = false)
-	private Grupo grupo;
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "ordenPago", nullable = false)
+	private OrdenPago ordenPago;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "alumno", nullable = false)
-	private Usuario alumno;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "producto", nullable = false)
+	private Producto producto;
 
-	private String estatus;
+	private Integer cantidad;
 
 	@Column(insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Date fechaRegistro;
@@ -44,16 +50,16 @@ public class UsuariosGrupo {
 	@Column(insertable = false, updatable = true, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Date fechaActualizacion;
 
-	public UsuariosGrupo(Integer id) {
+	public CarritoProductos(Integer id) {
 		super();
 		this.id = id;
 	}
 
-	public UsuariosGrupo(Grupo grupo, Usuario alumno, String estatus) {
+	public CarritoProductos(OrdenPago ordenPago, Producto producto, Integer cantidad) {
 		super();
-		this.grupo = grupo;
-		this.alumno = alumno;
-		this.estatus = estatus;
+		this.ordenPago = ordenPago;
+		this.producto = producto;
+		this.cantidad = cantidad;
 	}
 
 }

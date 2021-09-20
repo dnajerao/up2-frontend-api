@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,9 +38,14 @@ public class GrupoController {
 		return new ResponseEntity<Grupo>(grupoService.getGrupoById(id), HttpStatus.OK);
 	}
 
-	@PostMapping()
+	@PostMapping
 	public ResponseEntity<Grupo> addGrupo(@RequestBody Grupo grupo) {
 		return new ResponseEntity<Grupo>(grupoService.addGrupo(grupo), HttpStatus.OK);
+	}
+	
+	@PutMapping("/{id}")
+	public ResponseEntity<Grupo> updateGrupo(@PathVariable Integer id, @RequestBody Grupo grupo) {
+		return new ResponseEntity<Grupo>(grupoService.updateGrupo(id, grupo), HttpStatus.OK);
 	}
 	
 	@GetMapping("/usuariosWOgrupo")

@@ -12,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.AllArgsConstructor;
@@ -28,39 +27,35 @@ import lombok.ToString;
 @ToString
 @Entity
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-public class Usuario {
+public class Direccion {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	private String nombre;
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "usuario", nullable = true)
+	private Usuario usuario;
 
-	private String apellidoPaterno;
+	private String calle;
 
-	private String apellidoMaterno;
+	private String numeroExterior;
 
-	private Date fechaNacimiento;
+	private String numeroInterior;
 
-	private String telefono;
+	private String colonia;
 
-	@Column(unique = true)
-	private String correoElectronico;
+	private String delegacion;
 
-	@JsonIgnore
-	private String contrasena;
+	private String estado;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinColumn(name = "usuario_responsable", nullable = true)
-	private Usuario usuarioResponsable;
+	private Integer codigoPostal;
 
-	@ManyToOne
-	@JoinColumn(name = "rol", nullable = false)
-	private Rol rol;
+	private String entreCalle1;
 
-	private Byte[] foto;
+	private String entreCalle2;
 
-	private String idConekta;
+	private String observacion;
 
 	@Column(insertable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Date fechaRegistro;
@@ -68,13 +63,21 @@ public class Usuario {
 	@Column(insertable = false, updatable = true, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
 	private Date fechaActualizacion;
 
-	public Usuario(Integer id) {
+	public Direccion(Integer id) {
 		super();
 		this.id = id;
 	}
 
-	public String nameToEmailString() {
-		return String.format("%s %s", this.getNombre(), this.getApellidoPaterno());
+	public String toMailString() {
+		return calle
+			+ ", " + (!numeroInterior.equals(null) ? "exterior " + numeroInterior.trim() : "exterior s/n")
+			+ ", " + (!numeroInterior.equals(null) ? "interior " + numeroInterior.trim() : "interior s/n")
+			+ ", " + colonia.trim()
+			+ ", " + delegacion.trim()
+			+ ", " + estado.trim()
+			+ ", código postal " + codigoPostal
+			+ ", entre calle " + entreCalle1.trim() + " y calle " + entreCalle2.trim()
+			+ ", " + observacion.trim();
 	}
 
 }
