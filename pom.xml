@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>com.up2promisedland.api</groupId>
 	<artifactId>up2-backend-api</artifactId>
-	<version>0.0.3</version>
+	<version>0.0.4</version>
 	<packaging>war</packaging>
 	<name>up2-backend-api</name>
 	<description>Up2 Promised Land API</description>
